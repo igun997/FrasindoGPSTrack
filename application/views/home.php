@@ -10,7 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script src="http://gps.id/engine/userspace.php?user=sandysal0882&session=4e78e7f4160a9a6e6219a25ce74283f3" type="text/javascript"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cosmo/bootstrap.min.css" integrity="sha384-h21C2fcDk/eFsW9sC9h0dhokq5pDinLNklTKoxIZRUn3+hvmgQSffLLQ4G4l2eEr" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script>
-         <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
+        <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
         <title>Tracker Mobil Rental</title>
         <style>
             /* Always set the map height explicitly to define the size of the div
@@ -77,62 +77,95 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             body {
                 padding: 20px;
             }
-            
 
         </style>
 
 
 
     </head>
+
     <body>
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
                     <div class="col-md-12" style="padding-bottom:10px;">
-                        <input class="form-control" id="cari" placeholder="Cari Dengan Lic"/>
+                        <input class="form-control" id="cari" placeholder="Cari Dengan Lic" />
                     </div>
                 </div>
             </div>
         </div>
         <div id="map"></div>
         <div id="result"></div>
-        <script>
-            var i;
-            setInterval(function() {
-                $.get("<?= base_url("ajax/getData")?>",
-                    function(data) {
-                        $("#result").html(data);
-                    });
-            }, 30000);
-            var map;
-            var l;
-            var o;
-            var bounds;
-            var mapOptions;
-            function initMap() {
-                bounds = new google.maps.LatLngBounds();
-                mapOptions = {
-                    mapTypeId: 'roadmap'
-                };
+        <script type="text/javascript">
+            //<![CDATA[
 
-                // Display a map on the page
-                map = new google.maps.Map(document.getElementById("map"), mapOptions);
-                map.setTilt(45);
-                Proses();
+            var map, infoWindow, intervalId;
+
+            var customIcons = {
+                restaurant: {
+                    icon: 'http://maps.gstatic.com/mapfiles/ridefinder-images/mm_20_blue.png'
+                },
+                bar: {
+                    icon: 'http://maps.gstatic.com/mapfiles/ridefinder-images/mm_20_red.png'
+                }
+            };
+
+            function load() {
+                map = new google.maps.Map(document.getElementById("map"), {
+                    center: new google.maps.LatLng(data.photos[0].latitude, data.photos[0].longitude),
+                    zoom: 13,
+                    mapTypeId: 'roadmap'
+                });
+
+                infoWindow = new google.maps.InfoWindow;
+                var trafficLayer = new google.maps.TrafficLayer();
+                trafficLayer.setMap(map);
+
+                // Trigger downloadUrl at an interval
+                intervalId = setInterval(triggerDownload, 5000);
             }
-            function Proses()
+
+            function bindInfoWindow(marker, map, infoWindow, html) {
+                google.maps.event.addListener(marker, 'click', function() {
+                    infoWindow.setContent(html);
+                    infoWindow.open(map, marker);
+                });
+            }
+
+            function bindInfoWindow(marker, map, infoWindow, html) {
+                google.maps.event.addListener(marker, 'click', function() {
+                    infoWindow.setContent(html);
+                    infoWindow.open(map, marker);
+                });
+            }
+
+            var markersArray = [];
+            var markerCluster;
+            function clearOverlays() {
+                for (var i = 0; i < markersArray.length; i++) {
+                    markersArray[i].setMap(null);
+                }
+               // console.log(markerCluster);
+            }
+
+            function triggerDownload() {
+                clearOverlays();
+                // Change this depending on the name of your PHP file
+                 $.get("<?= base_url("ajax/getData") ?>",function(hasil) {
+                      $("#result").html(hasil);
+                      console.log("Data Loaded");
+                     addMarker();
+                     //markerCluster = new MarkerClusterer(map, markersArray,{imagePath:'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                     
+                });
+            }
+            function addMarker()
             {
-                
-                // Multiple Markers
-                var markers = [];
-                var infoWindowContent = [];
-                for (i = 0; i <= data.photos.length - 1; i++) {
-                    var judul;
-                    judul = data.photos[i].photo_title;
-                    var long;
-                    long = data.photos[i].longitude;
-                    var lat;
-                    lat = data.photos[i].latitude;
+                for(i = 0; i < data.photos.length; i++)
+                {
+                    var point = new google.maps.LatLng(parseFloat(data.photos[i].latitude),parseFloat(data.photos[i].longitude));
+                    var color;
+                    var direction = data.photos[i].direction;
                     var clr = "grey";
                     if (data.photos[i].status > 0) {
                         if (data.photos[i].speed < 1) {
@@ -140,82 +173,43 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         } else {
                             clr = "blue";
                         }
-
                     }
-                    markers.push([judul, lat, long, data.photos[i].direction, clr]);
-                }
-                // Info Window Content
-                for (i = 0; i <= data.photos.length - 1; i++) {
-                    var head;
-                    head = data.photos[i].photo_title;
-                    var lic = head.split('-')[0];
-                    var nama = head.split('-')[1];
+                    var lic = data.photos[i].photo_title.split("-")[0];
+                    var nama = data.photos[i].photo_title.split("-")[1];
                     var speed = data.photos[i].speed;
-                    if (data.photos[i].status > 0) {
-                        var engine = 'Aktif';
-                    } else {
-                        var engine = 'Tidak Aktif';
-                    }
-                    infoWindowContent.push(['<p>Lic : ' + lic + '</p><p>Nama : ' + nama + '</p><p>Kecepatan : ' + speed + '</p><p>Direction : ' + data.photos[i].direction + ' Derajat</p><p>Status Mesin : ' + engine + '</p>']);
-                }
-
-
-
-                // Display multiple markers on a map
-                var infoWindow = new google.maps.InfoWindow(),
-                    marker, i;
-
-                // Loop through our array of markers & place each one on the map  
-
-                var drive = "";
-                var clustering = [];
-                for (i = 0; i < markers.length; i++) {
-
-                    var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
-                    bounds.extend(position);
-                    marker = new google.maps.Marker({
-                        position: position,
+                    var mileage = data.photos[i].mileage;
+                    var mesin = (data.photos[i].status > 0)?'Aktif':'Mati';
+                    var html = "<p>Nomor Polisi :"+lic+"</p><p>Nama :"+nama+"</p><p>Kecepatan :"+speed+" KM</p><p>Mileage :"+mileage+" KM</p><p>Status Mesin :"+mesin+"</p><p>Direction : "+direction+" Derajat</p>";
+                    var marker = new google.maps.Marker({
                         map: map,
-                        title: markers[i][0],
+                        position: point,
                         icon: {
                             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                             scale: 3,
-                            fillColor: markers[i][4],
+                            fillColor: clr,
                             fillOpacity: 0.8,
                             strokeWeight: 1,
-                            rotation: parseInt(markers[i][3])
+                            rotation: parseInt(direction)
                         }
                     });
-                    clustering.push(marker);
-                    // Allow each marker to have an info window    
-                    google.maps.event.addListener(marker, 'click', (function(marker, i) {
-                        return function() {
-                            infoWindow.setContent(infoWindowContent[i][0]);
-                            infoWindow.open(map, marker);
-                        }
-                    })(marker, i));
-
-                    // Automatically center the map fitting all markers on the screen
-                    map.fitBounds(bounds);
+                    markersArray.push(marker);
+                    bindInfoWindow(marker, map, infoWindow, html);
                 }
-                console.log(clustering);
-                var markerCluster = new MarkerClusterer(map, clustering, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-
-                
-                
-                //Trafik Lalu lintas 
-                var trafficLayer = new google.maps.TrafficLayer();
-                trafficLayer.setMap(map);
-
-                // Override our map zoom level once our fitBounds function runs (Make sure it only runs once)
-                var boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
-                    this.setZoom(6);
-                    google.maps.event.removeListener(boundsListener);
-                });
-                setTimeout(initMap, 30000);
             }
-            $("#cari").change(function() {
-              var lic = $("#cari").val();
+          
+            
+
+           
+
+            function doNothing() {}
+            
+
+            //]]>
+
+        </script>
+        <script>
+         $("#cari").change(function() {
+            var lic = $("#cari").val();
               var cari;
               var lat;
               var long;
@@ -278,13 +272,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       alert("Data Tidak Ditemukan");
                   }
                }
-         
-            });
-           
+         });
         </script>
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR6g9FUm1SRP6AKlfixTh7jpxgUBd7Vm0&callback=initMap">
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR6g9FUm1SRP6AKlfixTh7jpxgUBd7Vm0&callback=load">
+
+
         </script>
-       
+
     </body>
 
     </html>
