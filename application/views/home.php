@@ -10,6 +10,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script src="http://gps.id/engine/userspace.php?user=sandysal0882&session=4e78e7f4160a9a6e6219a25ce74283f3" type="text/javascript"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cosmo/bootstrap.min.css" integrity="sha384-h21C2fcDk/eFsW9sC9h0dhokq5pDinLNklTKoxIZRUn3+hvmgQSffLLQ4G4l2eEr" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script>
+         <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
         <title>Tracker Mobil Rental</title>
         <style>
             /* Always set the map height explicitly to define the size of the div
@@ -167,6 +168,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 // Loop through our array of markers & place each one on the map  
 
                 var drive = "";
+                var clustering = [];
                 for (i = 0; i < markers.length; i++) {
 
                     var position = new google.maps.LatLng(markers[i][1], markers[i][2]);
@@ -184,7 +186,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             rotation: parseInt(markers[i][3])
                         }
                     });
-
+                    clustering.push(marker);
                     // Allow each marker to have an info window    
                     google.maps.event.addListener(marker, 'click', (function(marker, i) {
                         return function() {
@@ -196,6 +198,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     // Automatically center the map fitting all markers on the screen
                     map.fitBounds(bounds);
                 }
+                console.log(clustering);
+                var markerCluster = new MarkerClusterer(map, clustering, {imagePath: 'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+
+                
+                
                 //Trafik Lalu lintas 
                 var trafficLayer = new google.maps.TrafficLayer();
                 trafficLayer.setMap(map);
@@ -275,11 +282,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             });
            
         </script>
-
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR6g9FUm1SRP6AKlfixTh7jpxgUBd7Vm0&callback=initMap">
-
-
         </script>
+       
     </body>
 
     </html>
