@@ -89,7 +89,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <div class="row">
                 <div class="col-md-12">
                     <div class="col-md-12" style="padding-bottom:10px;">
-                        <input class="form-control" id="cari" placeholder="Cari Dengan Lic" />
+                        <input class="form-control" id="cari" placeholder="Cari Mobil / Driver / POI" />
                     </div>
                 </div>
             </div>
@@ -99,45 +99,70 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script type="text/javascript">
             //<![CDATA[
 
-            var map, infoWindow, intervalId;
-
-            var customIcons = {
-                restaurant: {
-                    icon: 'http://maps.gstatic.com/mapfiles/ridefinder-images/mm_20_blue.png'
-                },
-                bar: {
-                    icon: 'http://maps.gstatic.com/mapfiles/ridefinder-images/mm_20_red.png'
-                }
-            };
-
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI;
             function load() {
                 map = new google.maps.Map(document.getElementById("map"), {
-                    center: new google.maps.LatLng(data.photos[0].latitude, data.photos[0].longitude),
+                    center: new google.maps.LatLng(-6.221202, 106.913503),
                     zoom: 13,
                     mapTypeId: 'roadmap'
                 });
 
                 infoWindow = new google.maps.InfoWindow;
+                infoPOI = new google.maps.InfoWindow;
                 var trafficLayer = new google.maps.TrafficLayer();
                 trafficLayer.setMap(map);
-
+                setPOI();
                 // Trigger downloadUrl at an interval
                 intervalId = setInterval(triggerDownload, 5000);
             }
-
+            function getPOI()
+            {
+                dataPOI.push(['ARGA',-6.221202, 106.913503,'Sesuatu']);
+            }
+            function setPOI()
+            {
+                getPOI();
+                for(i = 0; i < dataPOI.length; i++)
+                {
+                    var point = new google.maps.LatLng(parseFloat(dataPOI[i][1]),parseFloat(dataPOI[i][2]));
+                    var nama = dataPOI[i][0];
+                    var desk = dataPOI[i][3];
+                    var html = "<p>Nama Tempat :"+nama+"</p><p>Deksripsi :"+desk+"</p>";
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: point,
+                        label:  {
+                                    color: 'black',
+                                    fontWeight: 'bold',
+                                    text: nama,
+                                    fontSize: "8px"
+                                  },
+                        icon: {
+                            labelOrigin: new google.maps.Point(0, 2),
+                            path: google.maps.SymbolPath.CIRCLE,
+                            scale: 7,
+                            fillColor: 'white',
+                            fillOpacity: 0.8,
+                            strokeWeight: 1
+                        }
+                    });
+                    bindPoiInfo(marker,map,infoPOI,html);
+                }
+            }
+            function bindPoiInfo(poi,map,infoPOI,html)
+            {
+                google.maps.event.addListener(poi, 'click', function() {
+                    infoPOI.setContent(html);
+                    infoPOI.open(map, poi);
+                });
+            }
             function bindInfoWindow(marker, map, infoWindow, html) {
                 google.maps.event.addListener(marker, 'click', function() {
                     infoWindow.setContent(html);
                     infoWindow.open(map, marker);
                 });
             }
-
-            function bindInfoWindow(marker, map, infoWindow, html) {
-                google.maps.event.addListener(marker, 'click', function() {
-                    infoWindow.setContent(html);
-                    infoWindow.open(map, marker);
-                });
-            }
+            
 
             var markersArray = [];
             var markerCluster;
@@ -220,9 +245,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                for(i = 0; i <= data.photos.length-1; i++)
                {
                      cari = data.photos[i].photo_title;
-                     cari = cari.split("-")[0];
+                     cari = cari.split("-");
                      console.log(i);
-                     if(cari == lic)
+                     if(cari[0].toUpperCase() == lic.toUpperCase() || cari[1].toUpperCase() == lic.toUpperCase())
                      {
                          lat = data.photos[i].latitude;
                          long = data.photos[i].longitude;
