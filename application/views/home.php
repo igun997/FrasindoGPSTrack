@@ -209,7 +209,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
                 // Override our map zoom level once our fitBounds function runs (Make sure it only runs once)
                 var boundsListener = google.maps.event.addListener((map), 'bounds_changed', function(event) {
-                    this.setZoom(12);
+                    this.setZoom(6);
                     google.maps.event.removeListener(boundsListener);
                 });
                 setTimeout(initMap, 30000);
