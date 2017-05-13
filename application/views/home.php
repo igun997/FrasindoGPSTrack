@@ -49,7 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  text-align: center;
                  padding-right: 2px;
                  padding-left: 2px;
-                 width: 60px;
+                 width: auto;
                  border: 1px solid white;
                  white-space: nowrap;
            }
@@ -212,9 +212,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                      //getAdr(lat,long);
                     
                     var latlng = {lat: lat, lng: long};
-                    var mileage = data.photos[i].mileage;
+                    var mileage = (data.photos[i].mileage/1000).toFixed(2);
                     var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
-                    var html = "<div class='address-line full-width'>Car No :<b>"+lic+"</b></div><div class='address-line full-width'> Name : <b>"+nama+"</b></div><div class='address-line full-width'> Speed : <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  : <b>"+mesin+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
+                    var html = '<table width="100%"><tr><td align="left" valign="top" width=100><b>Car No </b></td><td>:' + lic + '</td></tr><tr>' + '<td align="left" valign="top" width=100><b>Name </b></td>' + '<td>:' +nama+ '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Speed </b></td>' + '<td>:' + speed + 'km/h ' + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Mileage (km)' + '</b></td>' + '<td>:' + mileage + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Engine </b></td>' + '<td>:' + mesin + '</td>' + '</tr></table>';
                     var marker = new MarkerWithLabel({
                         map: map,
                         position: point,
@@ -353,13 +353,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         var lic = head.split('-')[0];
                         var nama = head.split('-')[1];
                         var speed = data.photos[i].speed;
-                        var mileage = data.photos[i].mileage;
+                        var mileage = (data.photos[i].mileage/1000).toFixed(2);
                         if (data.photos[i].status > 0) {
                             var engine = 'ACTIVE';
                         } else {
                             var engine = 'OFF';
                         }
-                        var content = "<div class='address-line full-width'> Car No :<b>"+lic+"</b></div><div class='address-line full-width'> Name : <b>"+nama+"</b></div><div class='address-line full-width'> Speed : <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  : <b>"+engine+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
+                        var content = '<table width="100%"><tr><td align="left" valign="top" width=100><b>Car No </b></td><td>:' + lic + '</td></tr><tr>' + '<td align="left" valign="top" width=100><b>Name </b></td>' + '<td>:' +nama+ '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Speed </b></td>' + '<td>:' + speed + 'km/h ' + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Mileage (km)' + '</b></td>' + '<td>:' + mileage + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Engine </b></td>' + '<td>:' + engine + '</td>' + '</tr></table>';
                         infoWindow = new google.maps.InfoWindow({
                             content: content
                         });
