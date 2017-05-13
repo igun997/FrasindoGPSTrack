@@ -94,10 +94,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </div>
                 </div>
             </div>
-             <div class="row">
-                <div id="map" class="col-md-12"></div>
-            </div>
         </div>
+        <div id="map"></div>
         <div id="result"></div>
         <script type="text/javascript">
             //<![CDATA[
@@ -339,8 +337,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
          });
         </script>
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1cM44pjtWnEej7CgCeCVtYx5D70ImTdQ&callback=load">
-
-
+        </script>
+        <script async defer src="<?= base_url("assets/markv3.js") ?>">
         </script>
 
     </body>
