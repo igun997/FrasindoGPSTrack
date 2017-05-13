@@ -8,6 +8,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
         <meta charset="utf-8">
         <script src="http://gps.id/engine/userspace.php?user=sandysal0882&session=4e78e7f4160a9a6e6219a25ce74283f3" type="text/javascript"></script>
+        <script src="http://gps.id/engine/userpoi.php?user=sandysal0882&session=4e78e7f4160a9a6e6219a25ce7428" type="text/javascript"></script>
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cosmo/bootstrap.min.css" integrity="sha384-h21C2fcDk/eFsW9sC9h0dhokq5pDinLNklTKoxIZRUn3+hvmgQSffLLQ4G4l2eEr" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script>
         <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
@@ -99,64 +100,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script type="text/javascript">
             //<![CDATA[
 
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder;
             function load() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: new google.maps.LatLng(-6.221202, 106.913503),
                     zoom: 13,
                     mapTypeId: 'roadmap'
                 });
-
+                geocoder = new google.maps.Geocoder;
                 infoWindow = new google.maps.InfoWindow;
                 infoPOI = new google.maps.InfoWindow;
                 var trafficLayer = new google.maps.TrafficLayer();
                 trafficLayer.setMap(map);
-                setPOI();
                 // Trigger downloadUrl at an interval
-                intervalId = setInterval(triggerDownload, 5000);
+                intervalId = setInterval(triggerDownload, 9000);
             }
-            function getPOI()
-            {
-                dataPOI.push(['ARGA',-6.221202, 106.913503,'Sesuatu']);
-            }
-            function setPOI()
-            {
-                getPOI();
-                for(i = 0; i < dataPOI.length; i++)
-                {
-                    var point = new google.maps.LatLng(parseFloat(dataPOI[i][1]),parseFloat(dataPOI[i][2]));
-                    var nama = dataPOI[i][0];
-                    var desk = dataPOI[i][3];
-                    var html = "<p>Nama Tempat :"+nama+"</p><p>Deksripsi :"+desk+"</p>";
-                    var marker = new google.maps.Marker({
-                        map: map,
-                        position: point,
-                        label:  {
-                                    color: 'black',
-                                    fontWeight: 'bold',
-                                    text: nama,
-                                    fontSize: "8px"
-                                  },
-                        icon: {
-                            labelOrigin: new google.maps.Point(0, 2),
-                            path: google.maps.SymbolPath.CIRCLE,
-                            scale: 7,
-                            fillColor: 'white',
-                            fillOpacity: 0.8,
-                            strokeWeight: 1
-                        }
-                    });
-                    bindPoiInfo(marker,map,infoPOI,html);
-                }
-            }
-            function bindPoiInfo(poi,map,infoPOI,html)
-            {
-                google.maps.event.addListener(poi, 'click', function() {
-                    infoPOI.setContent(html);
-                    infoPOI.open(map, poi);
-                });
-            }
-            function bindInfoWindow(marker, map, infoWindow, html) {
+           
+            
+            function bindInfoWindow(marker, map, infoWindow, html,lat,long) {
+                console.log("Start Bind Info");
+                console.log("Lat :"+lat+" Long :"+long);
+                
                 google.maps.event.addListener(marker, 'click', function() {
                     infoWindow.setContent(html);
                     infoWindow.open(map, marker);
@@ -165,10 +129,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             
 
             var markersArray = [];
+            var poiMarkers = [];
             var markerCluster;
             function clearOverlays() {
                 for (var i = 0; i < markersArray.length; i++) {
                     markersArray[i].setMap(null);
+                }
+                 for (var i = 0; i < poiMarkers.length; i++) {
+                    poiMarkers[i].setMap(null);
                 }
                // console.log(markerCluster);
             }
@@ -184,6 +152,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                      
                 });
             }
+           var terdekat=null;
+           function getAdr(lat,long)
+            {
+                    console.log("Get Adress Name");
+                   terdekat = $.ajax({
+                      method: "GET",
+                      url: "<?= base_url("ajax/getAddr/") ?>"+lat+"/"+long
+                    })
+                      .done(function(msg) {
+                        return JSON.parse(msg);
+                      });
+            }
             function addMarker()
             {
                 for(i = 0; i < data.photos.length; i++)
@@ -191,7 +171,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var point = new google.maps.LatLng(parseFloat(data.photos[i].latitude),parseFloat(data.photos[i].longitude));
                     var color;
                     var direction = data.photos[i].direction;
-                    var clr = "grey";
+                    if(map.getMapTypeId() == "roadmap")
+                    {
+                        var clr = "grey";
+                    }else{
+                        var clr = "yellow";
+                    }
+                    
                     if (data.photos[i].status > 0) {
                         if (data.photos[i].speed < 1) {
                             clr = "cyan";
@@ -199,12 +185,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             clr = "blue";
                         }
                     }
+                    var stat = data.photos[i].status;
                     var lic = data.photos[i].photo_title.split("-")[0];
                     var nama = data.photos[i].photo_title.split("-")[1];
                     var speed = data.photos[i].speed;
+                    var lat = parseFloat(data.photos[i].latitude);
+                    var long = parseFloat(data.photos[i].longitude);
+                     //getAdr(lat,long);
+                    
+                    var latlng = {lat: lat, lng: long};
                     var mileage = data.photos[i].mileage;
-                    var mesin = (data.photos[i].status > 0)?'Aktif':'Mati';
-                    var html = "<p>Nomor Polisi :"+lic+"</p><p>Nama :"+nama+"</p><p>Kecepatan :"+speed+" KM</p><p>Mileage :"+mileage+" KM</p><p>Status Mesin :"+mesin+"</p><p>Direction : "+direction+" Derajat</p>";
+                    var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
+                    var html = "<p> <b>Car No</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+lic+"</p><p> <b>Name</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+nama+"</p><p> <b>Speed</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+speed+"</p><p> <b>Engine Status</b> : "+mesin+"</p><p> <b>Millage</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+mileage+" KM</p>";
                     var marker = new google.maps.Marker({
                         map: map,
                         position: point,
@@ -218,7 +210,31 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         }
                     });
                     markersArray.push(marker);
-                    bindInfoWindow(marker, map, infoWindow, html);
+                    bindInfoWindow(marker, map, infoWindow, html,lat,long);
+                }
+                for(i = 0; i < dataPOI.pois.length; i++)
+                {
+                    var point = new google.maps.LatLng(parseFloat(dataPOI.pois[i].latitude),parseFloat(dataPOI.pois[i].longitude));
+                    var nama = dataPOI.pois[i].poiname;
+                    var iko = 'http://gps.id/image/POI/0.gif';
+                    
+                    var marker = new google.maps.Marker({
+                        map: map,
+                        position: point,
+                        label:  {
+                                    color: 'black',
+                                    fontWeight: 'bold',
+                                    text: nama,
+                                    fontSize: "9px",
+                                    border: "1px"
+                                  },
+                        icon: {
+                            labelOrigin: new google.maps.Point(8, 20),
+                            url: iko
+                        }
+                    });
+                    poiMarkers.push(marker);
+                    //bindPoiInfo(marker,map,infoPOI);
                 }
             }
           
@@ -234,7 +250,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </script>
         <script>
          $("#cari").change(function() {
+            var isPoi = false;
             var lic = $("#cari").val();
+            var p;
               var cari;
               var lat;
               var long;
@@ -258,10 +276,25 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                      }
                    
                }
-                console.log("Lat dan Long"+lat+" | "+long);
+              if(lat == 0 && long ==0)
+              {
+                  for(p = 0; p < dataPOI.length; p++){
+                      if(lic.toUpperCase() == dataPOI[p][0].toUpperCase())
+                      {
+                          isPoi = true;
+                          lat = dataPOI[p][1];
+                          long = dataPOI[p][2];
+                          break;
+                      }else{
+                           lat = 0;
+                           long = 0;
+                      }
+                  }
+              }
+              console.log("Lat dan Long"+lat+" | "+long);
                if(lat != null && long != null)
                {
-                  if(lat != 0 && long != 0)
+                  if(lat != 0 && long != 0 && isPoi != true)
                   {
                        moveToLocation(lat,long);
                        var position = new google.maps.LatLng(lat, long);
@@ -283,23 +316,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         var lic = head.split('-')[0];
                         var nama = head.split('-')[1];
                         var speed = data.photos[i].speed;
+                        var mileage = data.photos[i].mileage;
                         if (data.photos[i].status > 0) {
-                            var engine = 'Aktif';
+                            var engine = 'ACTIVE';
                         } else {
-                            var engine = 'Tidak Aktif';
+                            var engine = 'OFF';
                         }
-                        var content = '<p>Lic : ' + lic + '</p><p>Nama : ' + nama + '</p><p>Kecepatan : ' + speed + '</p><p>Direction : ' + data.photos[i].direction + ' Derajat</p><p>Status Mesin : ' + engine + '</p>';
+                        var content = "<p> Car No &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+lic+"</p><p> Name &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+nama+"</p><p> Speed &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+speed+"</p><p> Engine Status : "+engine+"</p><p> Millage &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+mileage+" KM</p>";
                         infoWindow = new google.maps.InfoWindow({
                             content: content
                         });
                        infoWindow.open(map, marker);
+                  }else if(lat != 0 && long != 0 && isPoi == true){
+                        moveToLocation(lat,long);
+                           
                   }else{
-                      alert("Data Tidak Ditemukan");
+                        alert("Data Tidak Ditemukan");
                   }
                }
          });
         </script>
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBR6g9FUm1SRP6AKlfixTh7jpxgUBd7Vm0&callback=load">
+        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1cM44pjtWnEej7CgCeCVtYx5D70ImTdQ&callback=load">
 
 
         </script>
