@@ -35,7 +35,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
-                 border: 1px solid black;
+                 border: 1px solid white;
+                 padding-right: 2px;
+                 padding-left: 2px;
                  white-space: nowrap;
                }
             .labels {
@@ -45,7 +47,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
-                 border: 1px solid black;
+                 padding-right: 2px;
+                 padding-left: 2px;
+                 border: 1px solid white;
                  white-space: nowrap;
            }
             .controls {
@@ -218,7 +222,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             scale: 3,
                             fillColor: clr,
                             fillOpacity: 1,
-                            strokeWeight: 0,
+                            strokeWeight: 1,
                             rotation: parseInt(direction)
                         },
                         labelContent: data.photos[i].photo_title,
