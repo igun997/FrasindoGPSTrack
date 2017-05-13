@@ -9,9 +9,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <meta charset="utf-8">
         <script src="http://gps.id/engine/userspace.php?user=sandysal0882&session=4e78e7f4160a9a6e6219a25ce74283f3" type="text/javascript"></script>
         <script src="http://gps.id/engine/userpoi.php?user=sandysal0882&session=4e78e7f4160a9a6e6219a25ce7428" type="text/javascript"></script>
+       
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootswatch/3.3.7/cosmo/bootstrap.min.css" integrity="sha384-h21C2fcDk/eFsW9sC9h0dhokq5pDinLNklTKoxIZRUn3+hvmgQSffLLQ4G4l2eEr" crossorigin="anonymous">
         <script src="https://code.jquery.com/jquery-3.2.1.min.js" type="text/javascript"></script>
-        <script src="https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/markerclusterer.js"></script>
         <title>Tracker Mobil Rental</title>
         <style>
             /* Always set the map height explicitly to define the size of the div
@@ -28,7 +28,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 margin: 0;
                 padding: 0;
             }
-            
+            .labelcar {
+                 color: black;
+                 background-color: white;
+                 font-family: "Lucida Grande", "Arial", sans-serif;
+                 font-size: 10px;
+                 font-weight: bold;
+                 text-align: center;
+                 border: 1px solid black;
+                 white-space: nowrap;
+               }
+            .labels {
+             color: blue;
+             background-color: white;
+             font-family: "Lucida Grande", "Arial", sans-serif;
+             font-size: 10px;
+             font-weight: normal;
+             text-align: center;
+             width: 60px;     
+             border: 1px solid black;
+             white-space: nowrap;
+           }
             .controls {
                 margin-top: 10px;
                 border: 1px solid transparent;
@@ -85,7 +105,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
     </head>
 
-    <body>
+    <body onload="load()">
         <div class="container">
             <div class="row">
                 <div class="col-md-12">
@@ -197,7 +217,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var mileage = data.photos[i].mileage;
                     var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
                     var html = "<p> <b>Car No</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+lic+"</p><p> <b>Name</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+nama+"</p><p> <b>Speed</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+speed+"</p><p> <b>Engine Status</b> : "+mesin+"</p><p> <b>Millage</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+mileage+" KM</p>";
-                    var marker = new google.maps.Marker({
+                    var marker = new MarkerWithLabel({
                         map: map,
                         position: point,
                         icon: {
@@ -207,7 +227,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             fillOpacity: 0.8,
                             strokeWeight: 1,
                             rotation: parseInt(direction)
-                        }
+                        },
+                        labelContent: data.photos[i].photo_title,
+                        labelAnchor: new google.maps.Point(50, -10),
+                        labelClass: "labelcar", // the CSS class for the label
+                        labelStyle: {opacity: 0.95}
                     });
                     markersArray.push(marker);
                     bindInfoWindow(marker, map, infoWindow, html,lat,long);
@@ -218,21 +242,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var nama = dataPOI.pois[i].poiname;
                     var iko = 'http://gps.id/image/POI/0.gif';
                     
-                    var marker = new google.maps.Marker({
-                        map: map,
-                        position: point,
-                        label:  {
-                                    color: 'black',
-                                    fontWeight: 'bold',
-                                    text: nama,
-                                    fontSize: "9px",
-                                    border: "1px"
-                                  },
-                        icon: {
-                            labelOrigin: new google.maps.Point(8, 20),
-                            url: iko
-                        }
-                    });
+                     var marker = new MarkerWithLabel({
+                           position: point,
+                           draggable: false,
+                           title : dataPOI.pois[i].poiname,
+                           map: map,
+                           icon: iko,
+                           labelContent: dataPOI.pois[i].poiname,
+                           labelAnchor: new google.maps.Point(30, 0),
+                           labelClass: "labels", // the CSS class for the label
+                           labelStyle: {opacity: 0.5}
+                     });
                     poiMarkers.push(marker);
                     //bindPoiInfo(marker,map,infoPOI);
                 }
@@ -336,8 +356,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                }
          });
         </script>
-        <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1cM44pjtWnEej7CgCeCVtYx5D70ImTdQ&callback=load">
-        </script>
+        <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyD1cM44pjtWnEej7CgCeCVtYx5D70ImTdQ"></script>
+         <script src="http://gps.id/scripts/markerwithlabel.js"></script>
 
     </body>
 
