@@ -194,12 +194,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var point = new google.maps.LatLng(parseFloat(data.photos[i].latitude),parseFloat(data.photos[i].longitude));
                     var color;
                     var direction = data.photos[i].direction;
-                    var clr = "yellow";
+                    var clr = "#EEEEEE";
                     if (data.photos[i].status > 0) {
                         if (data.photos[i].speed < 1) {
-                            clr = "cyan";
+                            clr = "yellow";
                         } else {
-                            clr = "#81CFE0";
+                            clr = "cyan";
                         }
                     }
                     var stat = data.photos[i].status;
