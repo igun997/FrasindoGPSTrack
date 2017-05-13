@@ -49,7 +49,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  text-align: center;
                  padding-right: 2px;
                  padding-left: 2px;
-                 width: auto;
                  border: 1px solid white;
                  white-space: nowrap;
            }
@@ -214,7 +213,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var latlng = {lat: lat, lng: long};
                     var mileage = (data.photos[i].mileage/1000).toFixed(2);
                     var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
-                    var html = '<table width="100%"><tr><td align="left" valign="top" width=100><b>Car No </b></td><td>:' + lic + '</td></tr><tr>' + '<td align="left" valign="top" width=100><b>Name </b></td>' + '<td>:' +nama+ '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Speed </b></td>' + '<td>:' + speed + 'km/h ' + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Mileage (km)' + '</b></td>' + '<td>:' + mileage + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Engine </b></td>' + '<td>:' + mesin + '</td>' + '</tr></table>';
+                    var html = "<div class='address-line full-width'>Car No &nbsp:<b>"+lic+"</b></div><div class='address-line full-width'>Name &nbsp&nbsp: <b>"+nama+"</b></div><div class='address-line full-width'>Speed &nbsp&nbsp: <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  &nbsp: <b>"+mesin+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
                     var marker = new MarkerWithLabel({
                         map: map,
                         position: point,
@@ -258,7 +257,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                            map: map,
                            icon: iko,
                            labelContent: addNewlines(dataPOI.pois[i].poiname),
-                           labelAnchor: new google.maps.Point(30, 0),
+                           labelAnchor: new google.maps.Point(-9, 15),
                            labelClass: "labels", // the CSS class for the label
                            labelStyle: {opacity: 0.95}
                      });
@@ -359,7 +358,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         } else {
                             var engine = 'OFF';
                         }
-                        var content = '<table width="100%"><tr><td align="left" valign="top" width=100><b>Car No </b></td><td>:' + lic + '</td></tr><tr>' + '<td align="left" valign="top" width=100><b>Name </b></td>' + '<td>:' +nama+ '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Speed </b></td>' + '<td>:' + speed + 'km/h ' + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Mileage (km)' + '</b></td>' + '<td>:' + mileage + '</td>' + '</tr><tr>' + '<td align="left" valign="top" width=100><b>Engine </b></td>' + '<td>:' + engine + '</td>' + '</tr></table>';
+                        var content = "<div class='address-line full-width'>Car No &nbsp:<b>"+lic+"</b></div><div class='address-line full-width'>Name &nbsp&nbsp: <b>"+nama+"</b></div><div class='address-line full-width'>Speed &nbsp&nbsp: <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  &nbsp: <b>"+engine+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
                         infoWindow = new google.maps.InfoWindow({
                             content: content
                         });
