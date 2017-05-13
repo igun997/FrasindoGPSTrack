@@ -94,8 +94,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     </div>
                 </div>
             </div>
+             <div class="row">
+                <div id="map" class="col-md-12"></div>
+            </div>
         </div>
-        <div id="map"></div>
         <div id="result"></div>
         <script type="text/javascript">
             //<![CDATA[
