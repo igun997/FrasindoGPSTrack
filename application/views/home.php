@@ -49,6 +49,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  text-align: center;
                  padding-right: 2px;
                  padding-left: 2px;
+                 width: 60px;
                  border: 1px solid white;
                  white-space: nowrap;
            }
@@ -213,7 +214,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var latlng = {lat: lat, lng: long};
                     var mileage = data.photos[i].mileage;
                     var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
-                    var html = "<p> Car No :<b>"+lic+"</b></p><p> Name : <b>"+nama+"</b></p><p> Speed : <b>"+speed+" KM</b></p><p> Engine  : <b>"+mesin+"</b></p><p> Millage</b> : <b>"+mileage+" KM</b></p>";
+                    var html = "<div class='address-line full-width'>Car No :<b>"+lic+"</b></div><div class='address-line full-width'> Name : <b>"+nama+"</b></div><div class='address-line full-width'> Speed : <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  : <b>"+mesin+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
                     var marker = new MarkerWithLabel({
                         map: map,
                         position: point,
@@ -256,14 +257,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                            title : dataPOI.pois[i].poiname,
                            map: map,
                            icon: iko,
-                           labelContent: '<b>'+dataPOI.pois[i].poiname+'<b>',
-                           labelAnchor: new google.maps.Point(15, 0),
+                           labelContent: addNewlines(dataPOI.pois[i].poiname),
+                           labelAnchor: new google.maps.Point(30, 0),
                            labelClass: "labels", // the CSS class for the label
                            labelStyle: {opacity: 0.95}
                      });
                     poiMarkers.push(marker);
                     //bindPoiInfo(marker,map,infoPOI);
                 }
+            }
+            function addNewlines(str) {
+              var result = '';
+              while (str.length > 0) {
+                result += str.substring(0, 12) + '<br>';
+                str = str.substring(12);
+              }
+              return result;
             }
           
             
@@ -350,7 +359,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         } else {
                             var engine = 'OFF';
                         }
-                        var content = "<p>Car No : <b>"+lic+"</b></p><p>Name : <b>"+nama+"</b></p><p> Speed : <b>"+speed+"</b></p><p> Engine  : <b>"+engine+"</b></p><p> Millage: <b>"+mileage+"</b> KM</p>";
+                        var content = "<div class='address-line full-width'> Car No :<b>"+lic+"</b></div><div class='address-line full-width'> Name : <b>"+nama+"</b></div><div class='address-line full-width'> Speed : <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  : <b>"+engine+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
                         infoWindow = new google.maps.InfoWindow({
                             content: content
                         });
