@@ -278,12 +278,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                }
               if(lat == 0 && long ==0)
               {
-                  for(p = 0; p < dataPOI.length; p++){
-                      if(lic.toUpperCase() == dataPOI[p][0].toUpperCase())
+                  for(p = 0; p < dataPOI.pois.length; p++){
+                      if(lic.toUpperCase() == dataPOI.pois[p].poiname.toUpperCase())
                       {
                           isPoi = true;
-                          lat = dataPOI[p][1];
-                          long = dataPOI[p][2];
+                          lat = dataPOI.pois[p].latitude;
+                          long = dataPOI.pois[p].longitude;
                           break;
                       }else{
                            lat = 0;
