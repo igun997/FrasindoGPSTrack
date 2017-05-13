@@ -35,19 +35,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
-                 border: 1px solid black;
+                 border: 1px solid white;
                  white-space: nowrap;
                }
             .labels {
-             color: blue;
-             background-color: white;
-             font-family: "Lucida Grande", "Arial", sans-serif;
-             font-size: 10px;
-             font-weight: normal;
-             text-align: center;
-             width: 60px;     
-             border: 1px solid black;
-             white-space: nowrap;
+                 color: black;
+                 background-color: white;
+                 font-family: "Lucida Grande", "Arial", sans-serif;
+                 font-size: 10px;
+                 font-weight: bold;
+                 text-align: center;
+                 border: 1px solid white;
+                 white-space: nowrap;
            }
             .controls {
                 margin-top: 10px;
@@ -216,7 +215,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var latlng = {lat: lat, lng: long};
                     var mileage = data.photos[i].mileage;
                     var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
-                    var html = "<p> <b>Car No</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+lic+"</p><p> <b>Name</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+nama+"</p><p> <b>Speed</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+speed+"</p><p> <b>Engine Status</b> : "+mesin+"</p><p> <b>Millage</b> &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+mileage+" KM</p>";
+                    var html = "<p> Car No :<b>"+lic+"</b></p><p> Name : <b>"+nama+"</b></p><p> Speed : <b>"+speed+" KM</b></p><p> Engine  : <b>"+mesin+"</b></p><p> Millage</b> : <b>"+mileage+" KM</b></p>";
                     var marker = new MarkerWithLabel({
                         map: map,
                         position: point,
@@ -240,7 +239,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 {
                     var point = new google.maps.LatLng(parseFloat(dataPOI.pois[i].latitude),parseFloat(dataPOI.pois[i].longitude));
                     var nama = dataPOI.pois[i].poiname;
-                    var iko = 'http://gps.id/image/POI/0.gif';
+                    if(dataPOI.pois[i].icon == 0)
+                    {
+                        var iko = 'http://gps.id/image/POI/0.gif';
+                    }else if(dataPOI.pois[i].icon == 11){
+                        var iko = 'http://gps.id/image/POI/11.gif';
+                    }else if(dataPOI.pois[i].icon == 28)
+                    {
+                        var iko = 'http://gps.id/image/POI/28.gif';
+                    }else if(dataPOI.pois[i].icon == 44)
+                    {
+                        var iko = 'http://gps.id/image/POI/44.gif';
+                    }
                     
                      var marker = new MarkerWithLabel({
                            position: point,
@@ -248,10 +258,10 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                            title : dataPOI.pois[i].poiname,
                            map: map,
                            icon: iko,
-                           labelContent: dataPOI.pois[i].poiname,
+                           labelContent: '<b>'+dataPOI.pois[i].poiname+'<b>',
                            labelAnchor: new google.maps.Point(30, 0),
                            labelClass: "labels", // the CSS class for the label
-                           labelStyle: {opacity: 0.5}
+                           labelStyle: {opacity: 0.95}
                      });
                     poiMarkers.push(marker);
                     //bindPoiInfo(marker,map,infoPOI);
@@ -342,7 +352,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         } else {
                             var engine = 'OFF';
                         }
-                        var content = "<p> Car No &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+lic+"</p><p> Name &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+nama+"</p><p> Speed &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+speed+"</p><p> Engine Status : "+engine+"</p><p> Millage &nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp&nbsp: "+mileage+" KM</p>";
+                        var content = "<p>Car No : <b>"+lic+"</b></p><p>Name : <b>"+nama+"</b></p><p> Speed : <b>"+speed+"</b></p><p> Engine  : <b>"+mesin+"</b></p><p> Millage: <b>"+mileage+"</b> KM</p>";
                         infoWindow = new google.maps.InfoWindow({
                             content: content
                         });
