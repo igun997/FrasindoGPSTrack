@@ -338,8 +338,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </script>
         <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1cM44pjtWnEej7CgCeCVtYx5D70ImTdQ&callback=load">
         </script>
-        <script async defer src="<?= base_url("assets/markv3.js") ?>">
-        </script>
 
     </body>
 
