@@ -31,21 +31,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             .labelcar {
                  color: black;
                  background-color: white;
-                 font-family: "Lucida Grande", "Arial", sans-serif;
+                 font-family: "Calibri";
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
-                 border: 1px solid white;
+                 border: 1px solid black;
                  white-space: nowrap;
                }
             .labels {
-                 color: black;
+                 color: blue;
                  background-color: white;
-                 font-family: "Lucida Grande", "Arial", sans-serif;
+                 font-family: "Calibri";
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
-                 border: 1px solid white;
+                 border: 1px solid black;
                  white-space: nowrap;
            }
             .controls {
@@ -140,7 +140,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 console.log("Start Bind Info");
                 console.log("Lat :"+lat+" Long :"+long);
                 
-                google.maps.event.addListener(marker, 'click', function() {
+                google.maps.event.addListener(marker, 'mouseover', function() {
                     infoWindow.setContent(html);
                     infoWindow.open(map, marker);
                 });
@@ -190,18 +190,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var point = new google.maps.LatLng(parseFloat(data.photos[i].latitude),parseFloat(data.photos[i].longitude));
                     var color;
                     var direction = data.photos[i].direction;
-                    if(map.getMapTypeId() == "roadmap")
-                    {
-                        var clr = "grey";
-                    }else{
-                        var clr = "yellow";
-                    }
-                    
+                    var clr = "yellow";
                     if (data.photos[i].status > 0) {
                         if (data.photos[i].speed < 1) {
                             clr = "cyan";
                         } else {
-                            clr = "blue";
+                            clr = "#81CFE0";
                         }
                     }
                     var stat = data.photos[i].status;
@@ -223,12 +217,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
                             scale: 3,
                             fillColor: clr,
-                            fillOpacity: 0.8,
-                            strokeWeight: 1,
+                            fillOpacity: 1,
+                            strokeWeight: 0,
                             rotation: parseInt(direction)
                         },
                         labelContent: data.photos[i].photo_title,
-                        labelAnchor: new google.maps.Point(50, -10),
+                        labelAnchor: new google.maps.Point(50, -15),
                         labelClass: "labelcar", // the CSS class for the label
                         labelStyle: {opacity: 0.95}
                     });
@@ -259,7 +253,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                            map: map,
                            icon: iko,
                            labelContent: '<b>'+dataPOI.pois[i].poiname+'<b>',
-                           labelAnchor: new google.maps.Point(30, 0),
+                           labelAnchor: new google.maps.Point(15, 0),
                            labelClass: "labels", // the CSS class for the label
                            labelStyle: {opacity: 0.95}
                      });
@@ -352,7 +346,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         } else {
                             var engine = 'OFF';
                         }
-                        var content = "<p>Car No : <b>"+lic+"</b></p><p>Name : <b>"+nama+"</b></p><p> Speed : <b>"+speed+"</b></p><p> Engine  : <b>"+mesin+"</b></p><p> Millage: <b>"+mileage+"</b> KM</p>";
+                        var content = "<p>Car No : <b>"+lic+"</b></p><p>Name : <b>"+nama+"</b></p><p> Speed : <b>"+speed+"</b></p><p> Engine  : <b>"+engine+"</b></p><p> Millage: <b>"+mileage+"</b> KM</p>";
                         infoWindow = new google.maps.InfoWindow({
                             content: content
                         });
