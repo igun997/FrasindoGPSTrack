@@ -114,6 +114,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 <div class="col-md-12">
                     <div class="col-md-12" style="padding-bottom:10px;">
                         <input class="form-control" id="cari" placeholder="Cari Mobil / Driver / POI" />
+                        <button class="btn btn-success" onclick="tgls()" id="tgls" >Hide Labels</button>
                     </div>
                 </div>
             </div>
@@ -123,7 +124,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script type="text/javascript">
             //<![CDATA[
 
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true;
             function load() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: new google.maps.LatLng(-6.221202, 106.913503),
@@ -138,7 +139,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 // Trigger downloadUrl at an interval
                 intervalId = setInterval(triggerDownload, 9000);
             }
-           
+           function tgls()
+            {
+                if(showLabel == false)
+                {
+                    showLabel = true;
+                    $("#tgls").html("Hide Lables");
+                    triggerDownload();
+                }else{
+                    showLabel = false;
+                    $("#tgls").html("Show Lables");
+                    triggerDownload();
+                }   
+            }
             
             function bindInfoWindow(marker, map, infoWindow, html,lat,long) {
                 console.log("Start Bind Info");
@@ -153,14 +166,20 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
             var markersArray = [];
             var poiMarkers = [];
-            var markerCluster;
+            var clust = [];
             function clearOverlays() {
                 for (var i = 0; i < markersArray.length; i++) {
                     markersArray[i].setMap(null);
                 }
-                 for (var i = 0; i < poiMarkers.length; i++) {
+                for (var i = 0; i < poiMarkers.length; i++) {
                     poiMarkers[i].setMap(null);
                 }
+                for (var i = 0; i < clust.length; i++) {
+                    clust[i].setMap(null);
+                }
+                clust = [];
+                markersArray = [];
+                poiMarkers = [];
                // console.log(markerCluster);
             }
 
@@ -170,10 +189,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  $.get("<?= base_url("ajax/getData") ?>",function(hasil) {
                       $("#result").html(hasil);
                       console.log("Data Loaded");
-                     addMarker();
-                     //markerCluster = new MarkerClusterer(map, markersArray,{imagePath:'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
-                     
+                      addMarker();
+                    var clustEr = new MarkerClusterer(map, markersArray,{imagePath:'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                    clust.push(clustEr);
                 });
+                    
             }
            var terdekat=null;
            function getAdr(lat,long)
@@ -187,6 +207,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         return JSON.parse(msg);
                       });
             }
+           
             function addMarker()
             {
                 for(i = 0; i < data.photos.length; i++)
@@ -208,12 +229,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var speed = data.photos[i].speed;
                     var lat = parseFloat(data.photos[i].latitude);
                     var long = parseFloat(data.photos[i].longitude);
+                    var label_car = (showLabel == true)?data.photos[i].photo_title:'';
                      //getAdr(lat,long);
                     
                     var latlng = {lat: lat, lng: long};
                     var mileage = (data.photos[i].mileage/1000).toFixed(2);
                     var mesin = (data.photos[i].status > 0)?'ACTIVE':'OFF';
-                    var html = "<div class='address-line full-width'>Car No &nbsp:<b>"+lic+"</b></div><div class='address-line full-width'>Name &nbsp&nbsp: <b>"+nama+"</b></div><div class='address-line full-width'>Speed &nbsp&nbsp: <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  &nbsp: <b>"+mesin+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
+                    var html = "<div class='address-line full-width'>Car No &nbsp: <b>"+lic+"</b></div><div class='address-line full-width'>Name &nbsp&nbsp: <b>"+nama+"</b></div><div class='address-line full-width'>Speed &nbsp&nbsp: <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  &nbsp: <b>"+mesin+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
                     var marker = new MarkerWithLabel({
                         map: map,
                         position: point,
@@ -225,11 +247,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             strokeWeight: 1,
                             rotation: parseInt(direction)
                         },
-                        labelContent: data.photos[i].photo_title,
+                        labelContent: label_car,
                         labelAnchor: new google.maps.Point(50, -15),
                         labelClass: "labelcar", // the CSS class for the label
                         labelStyle: {opacity: 0.95}
                     });
+                    
                     markersArray.push(marker);
                     bindInfoWindow(marker, map, infoWindow, html,lat,long);
                 }
@@ -374,6 +397,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         </script>
         <script type="text/javascript" src="https://maps.google.com/maps/api/js?key=AIzaSyD1cM44pjtWnEej7CgCeCVtYx5D70ImTdQ"></script>
          <script src="http://gps.id/scripts/markerwithlabel.js"></script>
+         <script src="<?= base_url("assets/clust.js") ?>"></script>
 
     </body>
 
