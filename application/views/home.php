@@ -42,15 +42,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  white-space: nowrap;
                }
             .labels {
-                 color: blue;
-                 background-color: white;
+                 color: #333399;
+                 background-color: #FFFFFF;
                  font-family: "Roboto","Arial",sans-serif;
-                 font-size: 10px;
+                 font-size: 11px;
                  font-weight: bold;
                  text-align: center;
                  padding-right: 2px;
                  padding-left: 2px;
-                 border: 1px solid white;
+                 border: 1px solid #F3F3F3;
                  white-space: nowrap;
            }
             .controls {
@@ -116,7 +116,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="col-md-12" style="padding-bottom:10px;">
                         <input class="form-control" id="cari" placeholder="Cari Mobil / Driver / POI" />
                         <button class="btn btn-success" onclick="tgls()" id="tgls" >Hide Labels</button>
-                        <button class="btn btn-success" onclick="tgls_cluster()" id="tgls_clust" >Hide Cluster</button>
+                        <button class="btn btn-success" onclick="tgls_cluster()" id="tgls_clust" >Turn Off Cluster</button>
                     </div>
                 </div>
             </div>
@@ -159,13 +159,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 if(showCluster == false)
                 {
                     showCluster = true;
-                    $("#tgls_clust").html("Hide Cluster");
+                    $("#tgls_clust").html("Turn Off Cluster");
                     triggerDownload();
                 }else{
                     showCluster = false;
-                    $("#tgls_clust").html("Show Cluster");
+                    $("#tgls_clust").html("Turn On Cluster");
                     triggerDownload();
-                }   
+                }
+                console.log(showCluster);
             }
             
             function bindInfoWindow(marker, map, infoWindow, html,lat,long) {
@@ -189,8 +190,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 for (var i = 0; i < poiMarkers.length; i++) {
                     poiMarkers[i].setMap(null);
                 }
-                for (var i = 0; i < clust.length; i++) {
-                    clust[i].setMap(null);
+                if(showCluster == true)
+                {
+                    for (var i = 0; i < clust.length; i++) {
+                        clust[i].setMap(null);
+                    }
+                }else{
+                    for (var i = 0; i < clust.length; i++) {
+                        clust[i].clearMarkers();;
+                    }
                 }
                 clust = [];
                 markersArray = [];
@@ -205,14 +213,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       $("#result").html(hasil);
                       console.log("Data Loaded");
                       addMarker();
-                    var clustEr = new MarkerClusterer(map, markersArray,{imagePath:'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                  
                     if(showCluster == true)
                     {
-                        clustEr.redraw();
-                    }else{
-                        clustEr.clearMarkers();
+                         var clustEr = new MarkerClusterer(map, markersArray,{imagePath:'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                         clust.push(clustEr);
                     }
-                    clust.push(clustEr);
+                    
                 });
                     
             }
