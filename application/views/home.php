@@ -29,19 +29,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 padding: 0;
             }
             .labelcar {
-                 color: black;
-                 background-color: white;
+                 color: #AA3300;
+                 background-color:#FFFFD7 ;
                  font-family: "Calibri";
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
-                 border: 1px solid white;
+                 border: 1px solid #F3F3F3;
                  padding-right: 2px;
                  padding-left: 2px;
                  white-space: nowrap;
                }
             .labels {
-                 color: blue;
+                 color: #333399;
                  background-color: white;
                  font-family: "Calibri";
                  font-size: 10px;
