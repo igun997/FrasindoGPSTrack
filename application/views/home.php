@@ -125,8 +125,52 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <div id="result"></div>
         <script type="text/javascript">
             //<![CDATA[
+            var RotateIcon = function(options){
+                this.options = options || {};
+                this.rImg = options.img || new Image();
+                this.rImg.src = this.rImg.src || this.options.url || '';
+                this.options.width = this.options.width || this.rImg.width || 52;
+                this.options.height = this.options.height || this.rImg.height || 60;
+                var canvas = document.createElement("canvas");
+                canvas.width = this.options.width;
+                canvas.height = this.options.height;
+                this.context = canvas.getContext("2d");
+                this.canvas = canvas;
+            };
+            RotateIcon.makeIcon = function(url) {
+                return new RotateIcon({url: url});
+            };
+            RotateIcon.prototype.setRotation = function(options){
+                var canvas = this.context,
+                    angle = options.deg ? options.deg * Math.PI / 180:
+                        options.rad,
+                    centerX = this.options.width/2,
+                    centerY = this.options.height/2;
 
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true;
+                canvas.clearRect(0, 0, this.options.width, this.options.height);
+                canvas.save();
+                canvas.translate(centerX, centerY);
+                canvas.rotate(angle);
+                canvas.translate(-centerX, -centerY);
+                canvas.drawImage(this.rImg, 0, 0);
+                canvas.restore();
+                return this;
+            };
+            RotateIcon.prototype.getUrl = function(){
+                return this.canvas.toDataURL('image/png');
+            };
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true,dataAkun;
+            function getDtail()
+            {
+                   console.log("Get Detail Akun");
+                  jQuery.ajax({
+                        url: '<?= base_url("ajax/getDetailInfo") ?>',
+                        success: function (result) {
+                            dataAkun = result;
+                        },
+                        async: false
+                    });
+            }
             function load() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: new google.maps.LatLng(-6.221202, 106.913503),
@@ -138,6 +182,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 infoPOI = new google.maps.InfoWindow;
                 var trafficLayer = new google.maps.TrafficLayer();
                 trafficLayer.setMap(map);
+                getDtail();
+                console.log(jQuery.parseJSON(dataAkun).VECHILE_INFO.VECHILE[0].TEUID);
+                
                 // Trigger downloadUrl at an interval
                 intervalId = setInterval(triggerDownload, 9000);
             }
@@ -224,17 +271,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     
             }
            var terdekat=null;
-           function getAdr(lat,long)
-            {
-                    console.log("Get Adress Name");
-                   terdekat = $.ajax({
-                      method: "GET",
-                      url: "<?= base_url("ajax/getAddr/") ?>"+lat+"/"+long
-                    })
-                      .done(function(msg) {
-                        return JSON.parse(msg);
-                      });
-            }
+           
            
             function addMarker()
             {
@@ -244,11 +281,14 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var color;
                     var direction = data.photos[i].direction;
                     var clr = "#EEEEEE";
+                    var images = "<?= base_url("assets/icon/icon_1_stop.gif") ?>";
                     if (data.photos[i].status > 0) {
                         if (data.photos[i].speed < 1) {
                             clr = "yellow";
+                            images = "<?= base_url("assets/icon/icon_0_stop.gif") ?>";
                         } else {
                             clr = "cyan";
+                            images = "<?= base_url("assets/icon/icon_1_driver.gif") ?>";
                         }
                     }
                     var stat = data.photos[i].status;
@@ -268,7 +308,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         map: map,
                         position: point,
                         icon: {
-                            path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+                            url: RotateIcon
+                                .makeIcon(
+                                    images)
+                                .setRotation({deg: direction})
+                                .getUrl(),
                             scale: 3,
                             fillColor: clr,
                             fillOpacity: 1,
