@@ -28,10 +28,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 margin: 0;
                 padding: 0;
             }
+            
             .labelcar {
                  color: #AA3300;
                  background-color:#FFFFD7 ;
-                 font-family: "Calibri";
+                 font-family: "Roboto","Arial",sans-serif;
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
@@ -41,9 +42,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  white-space: nowrap;
                }
             .labels {
-                 color: #333399;
+                 color: blue;
                  background-color: white;
-                 font-family: "Calibri";
+                 font-family: "Roboto","Arial",sans-serif;
                  font-size: 10px;
                  font-weight: bold;
                  text-align: center;
@@ -115,6 +116,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="col-md-12" style="padding-bottom:10px;">
                         <input class="form-control" id="cari" placeholder="Cari Mobil / Driver / POI" />
                         <button class="btn btn-success" onclick="tgls()" id="tgls" >Hide Labels</button>
+                        <button class="btn btn-success" onclick="tgls_cluster()" id="tgls_clust" >Hide Cluster</button>
                     </div>
                 </div>
             </div>
@@ -124,7 +126,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script type="text/javascript">
             //<![CDATA[
 
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true;
             function load() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: new google.maps.LatLng(-6.221202, 106.913503),
@@ -149,6 +151,19 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }else{
                     showLabel = false;
                     $("#tgls").html("Show Lables");
+                    triggerDownload();
+                }   
+            }
+            function tgls_cluster()
+            {
+                if(showCluster == false)
+                {
+                    showCluster = true;
+                    $("#tgls_clust").html("Hide Cluster");
+                    triggerDownload();
+                }else{
+                    showCluster = false;
+                    $("#tgls_clust").html("Show Cluster");
                     triggerDownload();
                 }   
             }
@@ -191,6 +206,12 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       console.log("Data Loaded");
                       addMarker();
                     var clustEr = new MarkerClusterer(map, markersArray,{imagePath:'https://developers.google.com/maps/documentation/javascript/examples/markerclusterer/m'});
+                    if(showCluster == true)
+                    {
+                        clustEr.redraw();
+                    }else{
+                        clustEr.clearMarkers();
+                    }
                     clust.push(clustEr);
                 });
                     
@@ -260,6 +281,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 {
                     var point = new google.maps.LatLng(parseFloat(dataPOI.pois[i].latitude),parseFloat(dataPOI.pois[i].longitude));
                     var nama = dataPOI.pois[i].poiname;
+                    var poi_label = (showLabel == true)?dataPOI.pois[i].poiname:'';
                     if(dataPOI.pois[i].icon == 0)
                     {
                         var iko = 'http://gps.id/image/POI/0.gif';
@@ -272,14 +294,13 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     {
                         var iko = 'http://gps.id/image/POI/44.gif';
                     }
-                    
                      var marker = new MarkerWithLabel({
                            position: point,
                            draggable: false,
                            title : dataPOI.pois[i].poiname,
                            map: map,
                            icon: iko,
-                           labelContent: addNewlines(dataPOI.pois[i].poiname),
+                           labelContent: addNewlines(poi_label),
                            labelAnchor: new google.maps.Point(-9, 15),
                            labelClass: "labels", // the CSS class for the label
                            labelStyle: {opacity: 0.95}
