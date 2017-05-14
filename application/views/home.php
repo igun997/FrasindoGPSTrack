@@ -428,36 +428,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                   if(lat != 0 && long != 0 && isPoi != true)
                   {
                        moveToLocation(lat,long);
-                       var position = new google.maps.LatLng(lat, long);
-                        marker = new google.maps.Marker({
-                            position: position,
-                            map: map,
-                            title: data.photos[i].photo_title,
-                            icon: {
-                                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
-                                scale: 3,
-                                fillColor: 'red',
-                                fillOpacity: 0.8,
-                                strokeWeight: 1,
-                                rotation: parseInt(data.photos[i].direction)
-                            }
-                        });
-                         var head;
-                        head = data.photos[i].photo_title;
-                        var lic = head.split('-')[0];
-                        var nama = head.split('-')[1];
-                        var speed = data.photos[i].speed;
-                        var mileage = (data.photos[i].mileage/1000).toFixed(2);
-                        if (data.photos[i].status > 0) {
-                            var engine = 'ACTIVE';
-                        } else {
-                            var engine = 'OFF';
-                        }
-                        var content = "<div class='address-line full-width'>Car No &nbsp:<b>"+lic+"</b></div><div class='address-line full-width'>Name &nbsp&nbsp: <b>"+nama+"</b></div><div class='address-line full-width'>Speed &nbsp&nbsp: <b>"+speed+" KM/h</b></div><div class='address-line full-width'> Engine  &nbsp: <b>"+engine+"</b></div><div class='address-line full-width'> Millage</b> : <b>"+mileage+" KM</b></div>";
-                        infoWindow = new google.maps.InfoWindow({
-                            content: content
-                        });
-                       infoWindow.open(map, marker);
                   }else if(lat != 0 && long != 0 && isPoi == true){
                         moveToLocation(lat,long);
                            
