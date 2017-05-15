@@ -85,4 +85,26 @@ class Ajax extends CI_Controller {
             curl_close($curl);// Get cURL resource
     
     }
+    public function getTrack($teuid,$start,$end)
+    {
+        $cookiefile = '_storedSession';
+        $url = 'http://gps.id/main.php';
+
+        $ch = curl_init();
+
+        // set URL and other appropriate options
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-www-form-urlencoded'));
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER , true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_URL, 'http://gps.id/engine/GPS.php');
+        $data = "<ROOT><USERID>sandysal0882</USERID><CMDTYPE>CM_QUERY_GPSDATABYCONDITION</CMDTYPE><PARADATA><TEUID>".$teuid."</TEUID><CONDITION>0</CONDITION><STARTTIME>".$start."</STARTTIME><ENDTIME>".$end."</ENDTIME></PARADATA></ROOT>: undefined";
+        curl_setopt($ch, CURLOPT_POSTFIELDS, "MfcISAPICommand=Getdata&data=".urlencode($data));
+        $output = curl_exec($ch);
+        $xml = simplexml_load_string($output);
+        echo json_encode($xml);
+            
+       
+    }
 }
