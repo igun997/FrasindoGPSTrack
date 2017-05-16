@@ -16,6 +16,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script type="text/javascript" src="<?= base_url("datetime") ?>/bower_components/moment/min/moment.min.js"></script>
         <script type="text/javascript" src="<?= base_url("datetime") ?>/bower_components/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js"></script>
         <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
+        <script  type="text/javascript" src="<?= base_url("assets/noui/nouislider.min.js") ?>" ></script>
+        <link href="<?= base_url("assets/noui/nouislider.min.css") ?>" rel="stylesheet" >
+        
         <title>Tracker Mobil Rental</title>
         <style>
             /* Always set the map height explicitly to define the size of the div
@@ -45,6 +50,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  padding-left: 2px;
                  white-space: nowrap;
                }
+            .slider-selection {
+                background: #BABABA;
+            }
             .labels {
                  color: #333399;
                  background-color: #FFFFFF;
@@ -124,6 +132,24 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <button class="btn btn-success" onclick="refresh()" id="tgl_refresh" >Turn Off Auto Refresh</button>
                         <button class="btn btn-success" onclick="ref()" id="ref" >Refresh Map</button>
                     </div>
+                    <div class="col-md-12" style="padding-bottom:10px;">
+                        <div id="trackPlayer" class="player text-center ">
+                         <div class="col-md-6">
+                        <button type="button" id="button_play" class="btn" onclick='buttonPlayPress()' >
+                          <i class="fa fa-play"></i>
+                        </button>
+                        <button type="button" id="button_play" class="btn" onclick='buttonPlayPress()' >
+                          <i class="fa fa-pause"></i>
+                        </button>
+                        <button type="button" id="button_stop" class="btn" onclick='buttonStopPress()'>
+                          <i class="fa fa-stop"></i>
+                        </button>
+                        </div>
+                        <div class="col-md-6">
+                            <input type="range" class="form-control" type="range" min="1" max="12" step="1" value="1"  id="motion">
+                        </div>
+                      </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -157,7 +183,9 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     format: 'YYYY-MM-DD hh:mm:ss'
                 });
             });
+
         </script>
+        
         <script type="text/javascript">
             //<![CDATA[
             var RotateIcon = function(options){
@@ -194,7 +222,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             RotateIcon.prototype.getUrl = function(){
                 return this.canvas.toDataURL('image/png');
             };
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true,dataAkun,triggerOn=true,dataTrack;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true,dataAkun,triggerOn=true,dataTrack,playTrack=false,showPlayer = false,stopTrack=false;
             function getDtail()
             {
                  console.log("Get Detail Akun");
@@ -206,23 +234,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         async: false
                     });
             }
-            function ref()
-            {
-                triggerOn = true;
-                showCluster = true;
-                triggerDownload();
-            }
-            function getTrack(uid,startDate,endDate)
-            {
-                 console.log("Data Tracked Loading ...");
-                  jQuery.ajax({
-                        url: '<?= base_url("ajax/getTrack/") ?>'+uid+'/'+startDate+'/'+endDate,
-                        success: function (result) {
-                            dataTrack = jQuery.parseJSON(result);
-                        },
-                        async: false
-                    });
-            }
+            
             function load() {
                 map = new google.maps.Map(document.getElementById("map"), {
                     center: new google.maps.LatLng(-6.221202, 106.913503),
@@ -249,6 +261,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 
                  if(triggerOn == false)
                 {
+                    
                     triggerOn = true;
                     $("#tgl_refresh").html("Turn Off Auto Refresh");
                     triggerDownload();
@@ -376,13 +389,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     });
                     markersArray.push(marker);
                     console.log("Path Drawing . .");
-                    var flightPlanCoordinates = [
-                          {lat: 37.772, lng: -122.214},
-                          {lat: 21.291, lng: -157.821},
-                          {lat: -18.142, lng: 178.431},
-                          {lat: -27.467, lng: 153.027}
-                        ];
-
                     var flightPath = new google.maps.Polyline({
                       path: lineTrack,
                       geodesic: true,
@@ -390,9 +396,23 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       strokeOpacity: 1.0,
                       strokeWeight: 2
                     });
-
                     flightPath.setMap(map);
                     fStore.push(flightPath);
+                    var totalTrack = dataTrack.GPS_INFO.DATA.length;
+                    console.log("Tracker Value : "+totalTrack);
+                    console.log("Set Min Value : "+dataTrack.GPS_INFO.DATA[0].TIME);
+                    $("#motion").attr("min",dataTrack.GPS_INFO.DATA[0].TIME);
+                    $("#motion").attr("max",dataTrack.GPS_INFO.DATA[totalTrack-1].TIME);
+                    $("#motion").attr("step",60);
+                    $("#motion").attr("value",dataTrack.GPS_INFO.DATA[0].TIME);
+                    showPlayer = true;
+                    if(showPlayer == true)
+                    {
+                        $("#trackPlayer").removeClass("hidden");
+                    }
+                    playTrack = false;
+                    loopTracker(marker,totalTrack,images);
+                    
                 }else{
                     $("#id_car").val(car);
                     $("#latLong").val(lat+"*"+long);
@@ -400,9 +420,52 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $("#trackDate").modal("show");
                 }
             }
+            var t = 0;
+            function loopTracker(m,totalTrack,images)
+            {
+                 var loopIt = setInterval(function() {
+                      if(playTrack == false) {
+                          if(lineTrack.length-1 != t)
+                          {
+                            console.log("Playing Track : "+Date(dataTrack.GPS_INFO.DATA[t].TIME))
+                            var latlng = lineTrack[t];
+                            map.setCenter(latlng);
+                            m.setPosition(latlng);
+                          $("#motion").attr("value",dataTrack.GPS_INFO.DATA[t].TIME);
+                              t = t + 1;
+                          }else{
+                              console.log("Stopping");
+                              stopTrack = true;
+                          }
+                      }else if(stopTrack == true){
+                          clearInterval(loopIt);
+                      }else{
+                          console.log("Paused");
+                      }
+                    }, 2000);
+            }
             $("#trackDate").on('hide.bs.modal', function () {
                $(':input', this).val('');
             });
+            function ref()
+            {
+                triggerOn = true;
+                showCluster = true;
+                dateLoaded = false;
+                clearOverlays();
+                triggerDownload();
+            }
+            function getTrack(uid,startDate,endDate)
+            {
+                 console.log("Data Tracked Loading ...");
+                  jQuery.ajax({
+                        url: '<?= base_url("ajax/getTrack/")?>'+uid+'/'+startDate+'/'+endDate,
+                        success: function (result) {
+                            dataTrack = jQuery.parseJSON(result);
+                        },
+                        async: false
+                    });
+            }
             $("#submitDate").click(function() {
               
                 console.log("Submit Form  Started..");
@@ -424,8 +487,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
                 console.log("Call Track . . ");
                 loadTrack(id_car,teuid,lat,long);
-                
-                
             });
             
             function triggerDownload() {
