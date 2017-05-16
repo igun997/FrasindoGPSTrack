@@ -133,15 +133,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <button class="btn btn-success" onclick="ref()" id="ref" >Refresh Map</button>
                     </div>
                     <div class="col-md-12" style="padding-bottom:10px;">
-                        <div id="trackPlayer" class="player text-center ">
+                        <div id="trackPlayer" class="player text-center hidden">
                          <div class="col-md-6">
-                        <button type="button" id="button_play" class="btn" onclick='buttonPlayPress()' >
+                        <button type="button" id="button_play" class="btn" onclick='play()' >
                           <i class="fa fa-play"></i>
                         </button>
-                        <button type="button" id="button_play" class="btn" onclick='buttonPlayPress()' >
+                        <button type="button" id="button_pause" class="btn" onclick='play()' disabled>
                           <i class="fa fa-pause"></i>
                         </button>
-                        <button type="button" id="button_stop" class="btn" onclick='buttonStopPress()'>
+                        <button type="button" id="button_stop" class="btn" onclick='stop()'disabled>
                           <i class="fa fa-stop"></i>
                         </button>
                         </div>
@@ -401,16 +401,18 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var totalTrack = dataTrack.GPS_INFO.DATA.length;
                     console.log("Tracker Value : "+totalTrack);
                     console.log("Set Min Value : "+dataTrack.GPS_INFO.DATA[0].TIME);
-                    $("#motion").attr("min",dataTrack.GPS_INFO.DATA[0].TIME);
-                    $("#motion").attr("max",dataTrack.GPS_INFO.DATA[totalTrack-1].TIME);
-                    $("#motion").attr("step",60);
-                    $("#motion").attr("value",dataTrack.GPS_INFO.DATA[0].TIME);
+                    $("#trackPlayer").removeClass("hidden");
+                    $("#motion").attr("min",0);
+                    $("#motion").attr("max",totalTrack-1);
+                    $("#motion").attr("step",1);
+                    $("#motion").attr("value",0);
                     showPlayer = true;
                     if(showPlayer == true)
                     {
                         $("#trackPlayer").removeClass("hidden");
                     }
                     playTrack = false;
+                    t = 0;
                     loopTracker(marker,totalTrack,images);
                     
                 }else{
@@ -421,24 +423,48 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
             var t = 0;
+            $("#motion").on("change", function(){
+                t = this.value;
+                console.log("Set T to : "+t);
+            });
             function loopTracker(m,totalTrack,images)
             {
+                console.log("Total Track : "+lineTrack.length+ " TotalTrack = "+totalTrack);
                  var loopIt = setInterval(function() {
-                      if(playTrack == false) {
+                      if(playTrack == true) {
                           if(lineTrack.length-1 != t)
                           {
                             console.log("Playing Track : "+Date(dataTrack.GPS_INFO.DATA[t].TIME))
+                            console.log("Kordinat : "+lineTrack[t].lat+" "+lineTrack[t].lng)
+                            var images = "<?= base_url("assets/icon/icon_3_stop.gif") ?>";
+                            var direksi = dataTrack.GPS_INFO.DATA[t].DIRECTION;
+                            if (dataTrack.GPS_INFO.DATA[t].SPEED > 0) {
+                                if (dataTrack.GPS_INFO.DATA[t].SPEED < 1) {
+                                    images = "<?= base_url("assets/icon/icon_3_lost.gif") ?>";
+                                } else {
+                                    images = "<?= base_url("assets/icon/icon_3_driver.gif") ?>";
+                                }
+                            }
                             var latlng = lineTrack[t];
+                            m.setIcon({
+                                url :RotateIcon
+                                .makeIcon(
+                                    images)
+                                .setRotation({deg: direksi})
+                                .getUrl()
+                            });
                             map.setCenter(latlng);
                             m.setPosition(latlng);
-                          $("#motion").attr("value",dataTrack.GPS_INFO.DATA[t].TIME);
-                              t = t + 1;
+                          $("#motion").attr("value",t);
+                              t++;
+                              console.log("Current T : "+t);
                           }else{
                               console.log("Stopping");
                               stopTrack = true;
                           }
                       }else if(stopTrack == true){
                           clearInterval(loopIt);
+                          t = 0;
                       }else{
                           console.log("Paused");
                       }
@@ -447,11 +473,43 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             $("#trackDate").on('hide.bs.modal', function () {
                $(':input', this).val('');
             });
+            function play()
+            {
+                if(playTrack == true)
+                {
+                    console.log("Pause . . ");
+                    playTrack = false;
+                    $("#button_stop").attr("disabled");
+                    $("#button_pause").attr("disabled");
+                    $("#button_play").removeAttr("disabled");
+                }else{
+                    console.log("Strating . . ");
+                    playTrack = true;
+                   $("#button_stop").removeAttr("disabled");
+                    $("#button_pause").removeAttr("disabled");
+                    $("#button_play").attr("disabled");
+                }
+            }
+            function stop()
+            {
+                console.log("Stopping .. ")
+                if(stopTrack == false)
+                {
+                    stopTrack = true;
+                    $("#button_stop").removeAttr("disabled");
+                }else{
+                     stopTrack = false;
+                    $("#button_stop").attr("disabled");
+                }
+            }
             function ref()
             {
                 triggerOn = true;
                 showCluster = true;
                 dateLoaded = false;
+                stopTrack = false;
+                playTrack = false;
+                $("#trackPlayer").addClass("hidden");
                 clearOverlays();
                 triggerDownload();
             }
