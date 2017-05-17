@@ -130,7 +130,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <button class="btn btn-success" onclick="tgls()" id="tgls" >Hide Labels</button>
                         <button class="btn btn-success" onclick="tgls_cluster()" id="tgls_clust" >Turn Off Cluster</button>
                         <button class="btn btn-success" onclick="refresh()" id="tgl_refresh" >Turn Off Auto Refresh</button>
-                        <button class="btn btn-success" onclick="ref()" id="ref" >Refresh Map</button>
                     </div>
                     <div class="col-md-12" style="padding-bottom:10px;">
                         <div id="trackPlayer" class="player text-center hidden">
@@ -140,9 +139,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         </button>
                         <button type="button" id="button_pause" class="btn" onclick='play()' disabled>
                           <i class="fa fa-pause"></i>
+                        </button> 
+                        <button type="button" id="button_slower" class="btn" onclick='slower()' >
+                          <i class="fa fa-fast-backward"></i>
                         </button>
-                        <button type="button" id="button_stop" class="btn" onclick='stop()'disabled>
-                          <i class="fa fa-stop"></i>
+                        <button type="button" id="button_faster" class="btn" onclick='faster()' >
+                          <i class="fa fa-fast-forward"></i>
+                        </button>
+                        <button type="button" id="button_stop" class="btn" onclick='ref()'disabled>
+                          <i class="fa fa-refresh"></i>
                         </button>
                         </div>
                         <div class="col-md-6">
@@ -222,7 +227,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             RotateIcon.prototype.getUrl = function(){
                 return this.canvas.toDataURL('image/png');
             };
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true,dataAkun,triggerOn=true,dataTrack,playTrack=false,showPlayer = false,stopTrack=false;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true,dataAkun,triggerOn=true,dataTrack,playTrack=true,showPlayer = false,stopTrack=false;
             function getDtail()
             {
                  console.log("Get Detail Akun");
@@ -411,7 +416,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     {
                         $("#trackPlayer").removeClass("hidden");
                     }
-                    playTrack = false;
+                    playTrack = true;
                     t = 0;
                     loopTracker(marker,totalTrack,images);
                     
@@ -423,6 +428,27 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
             var t = 0;
+            var intSpeed = 2000;
+            function faster(){
+                if(intSpeed > 0)
+                {
+                    console.log("Speed Up");
+                    intSpeed = intSpeed - 200;
+                    console.log(intSpeed);
+                }else{
+                    alert("This is Faster Settings");
+                }
+            }
+            function slower(){
+                if(intSpeed <= 4000)
+                {
+                    console.log("Slow Up");
+                    intSpeed = intSpeed + 200;
+                    console.log(intSpeed);
+                }else{
+                    alert("This is Slower Settings");
+                }
+            }
             $("#motion").on("change", function(){
                 t = this.value;
                 console.log("Set T to : "+t);
@@ -461,6 +487,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                           }else{
                               console.log("Stopping");
                               stopTrack = true;
+                              $("#motion").attr("value",0);
                           }
                       }else if(stopTrack == true){
                           clearInterval(loopIt);
@@ -468,7 +495,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       }else{
                           console.log("Paused");
                       }
-                    }, 2000);
+                    }, intSpeed);
             }
             $("#trackDate").on('hide.bs.modal', function () {
                $(':input', this).val('');
