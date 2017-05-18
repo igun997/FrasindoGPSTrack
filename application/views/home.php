@@ -137,21 +137,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         <button type="button" id="button_play" class="btn" onclick='play()' >
                           <i class="fa fa-play"></i>
                         </button>
-                        <button type="button" id="button_pause" class="btn" onclick='play()' disabled>
+                        <button type="button" id="button_pause" class="btn" onclick='play()' >
                           <i class="fa fa-pause"></i>
                         </button> 
-                        <button type="button" id="button_slower" class="btn" onclick='slower()' >
-                          <i class="fa fa-fast-backward"></i>
-                        </button>
-                        <button type="button" id="button_faster" class="btn" onclick='faster()' >
-                          <i class="fa fa-fast-forward"></i>
-                        </button>
-                        <button type="button" id="button_stop" class="btn" onclick='ref()'disabled>
+                        <button type="button" id="button_stop" class="btn" onclick='ref()'>
                           <i class="fa fa-refresh"></i>
                         </button>
+                         <button type="button" id="button_speed" class="btn" onclick='showSpeed()'>
+                          <i class="fa fa-tachometer"></i>
+                        </button>
+                         <div id="divRange" class="col-md-6 hidden">
+                             <input type="range" class="form-control" type="range" min="-5" max="5" step="1" value="0" id="speed">
+                         </div>
                         </div>
                         <div class="col-md-6">
                             <input type="range" class="form-control" type="range" min="1" max="12" step="1" value="1"  id="motion">
+                           <b><p id="timeStamp"></p></b>
                         </div>
                       </div>
                     </div>
@@ -428,39 +429,43 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 }
             }
             var t = 0;
-            var intSpeed = 2000;
-            function faster(){
-                if(intSpeed > 0)
+            var speedOn = false;
+            var intSpeed = 4000;
+            function showSpeed()
+            {
+                 $("#speed").attr("min",(intSpeed/2) * -1);
+                 $("#speed").attr("max",100*-1);
+                 $("#speed").attr("value",(intSpeed/2) * -1);
+                if(speedOn == false)
                 {
-                    console.log("Speed Up");
-                    intSpeed = intSpeed - 200;
-                    console.log(intSpeed);
+                    console.log("Show Interval");
+                    $("#divRange").removeClass("hidden");
+                    speedOn = true;
+                    
                 }else{
-                    alert("This is Faster Settings");
+                    console.log("Hide Interval");
+                    $("#divRange").addClass("hidden");
+                    speedOn = false;
                 }
+                
             }
-            function slower(){
-                if(intSpeed <= 4000)
-                {
-                    console.log("Slow Up");
-                    intSpeed = intSpeed + 200;
-                    console.log(intSpeed);
-                }else{
-                    alert("This is Slower Settings");
-                }
-            }
+            $("#speed").on("change", function(){
+                intSpeed = this.value*-1;
+                console.log("Speed Set To : "+intSpeed);
+            });
             $("#motion").on("change", function(){
                 t = this.value;
                 console.log("Set T to : "+t);
             });
             function loopTracker(m,totalTrack,images)
             {
-                console.log("Total Track : "+lineTrack.length+ " TotalTrack = "+totalTrack);
+                 console.log("Total Track : "+lineTrack.length+ " TotalTrack = "+totalTrack);
                  var loopIt = setInterval(function() {
                       if(playTrack == true) {
                           if(lineTrack.length-1 != t)
                           {
-                            console.log("Playing Track : "+Date(dataTrack.GPS_INFO.DATA[t].TIME))
+                            console.log("Playing Track : "+dataTrack.GPS_INFO.DATA[t].TIME)
+                            console.log("Int Speed : "+intSpeed);
                             console.log("Kordinat : "+lineTrack[t].lat+" "+lineTrack[t].lng)
                             var images = "<?= base_url("assets/icon/icon_3_stop.gif") ?>";
                             var direksi = dataTrack.GPS_INFO.DATA[t].DIRECTION;
@@ -482,6 +487,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                             map.setCenter(latlng);
                             m.setPosition(latlng);
                           $("#motion").attr("value",t);
+                              var d = new Date(dataTrack.GPS_INFO.DATA[t].TIME*1000);
+                              $("#timeStamp").html(d);
                               t++;
                               console.log("Current T : "+t);
                           }else{
@@ -495,7 +502,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       }else{
                           console.log("Paused");
                       }
-                    }, intSpeed);
+                     console.log("Recurusive . . ");
+                     setInterval(loopIt,intSpeed);
+                     console.log("Speed"+intSpeed);
+                    }, 2000);
+                      
             }
             $("#trackDate").on('hide.bs.modal', function () {
                $(':input', this).val('');
