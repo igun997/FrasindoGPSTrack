@@ -128,7 +128,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     <div class="col-md-12" style="padding-bottom:10px;">
                         <input class="form-control" id="cari" placeholder="Cari Mobil / Driver / POI" />
                         <button class="btn btn-success" onclick="tgls()" id="tgls" >Hide Labels</button>
-                        <button class="btn btn-success" onclick="tgls_cluster()" id="tgls_clust" >Turn Off Cluster</button>
+                        <button class="btn btn-success" onclick="tgls_cluster()" id="tgls_clust" >Turn ON Cluster</button>
                         <button class="btn btn-success" onclick="refresh()" id="tgl_refresh" >Turn Off Auto Refresh</button>
                     </div>
                     <div class="col-md-12" style="padding-bottom:10px;">
@@ -141,18 +141,21 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                           <i class="fa fa-pause"></i>
                         </button> 
                         <button type="button" id="button_stop" class="btn" onclick='ref()'>
-                          <i class="fa fa-refresh"></i>
+                          <i class="fa fa-close"></i>
                         </button>
-                         <button type="button" id="button_speed" class="btn" onclick='showSpeed()'>
-                          <i class="fa fa-tachometer"></i>
-                        </button>
+                        
                          <div id="divRange" class="col-md-6 hidden">
-                             <input type="range" class="form-control" type="range" min="-5" max="5" step="1" value="0" id="speed">
+                              <label>- Speed +</label>
+                                 <input type="range" class="form-control" type="range" min="-5" max="5" step="1" value="0" id="speed">
                          </div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-3">
                             <input type="range" class="form-control" type="range" min="1" max="12" step="1" value="1"  id="motion">
                            <b><p id="timeStamp"></p></b>
+                        </div>
+                        <div class="col-md-3">
+                        <select class="form-control" id="switchDate">
+                        </select>
                         </div>
                       </div>
                     </div>
@@ -186,7 +189,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <script type="text/javascript">
             $(function () {
                 $('.datetime').datetimepicker({
-                    format: 'YYYY-MM-DD hh:mm:ss'
+                    format: 'YYYY-MM-DD'
                 });
             });
 
@@ -228,7 +231,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             RotateIcon.prototype.getUrl = function(){
                 return this.canvas.toDataURL('image/png');
             };
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = true,dataAkun,triggerOn=true,dataTrack,playTrack=true,showPlayer = false,stopTrack=false;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = false,dataAkun,triggerOn=true,dataTrack,playTrack=true,showPlayer = false,stopTrack=false;
             function getDtail()
             {
                  console.log("Get Detail Akun");
@@ -354,6 +357,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             }
             var dateLoaded = false;
             var lineTrack = [];
+            var timeLine = [];
             function loadTrack(car,teuid,lat,long)
             {
                 console.log("Track Started . . .");
@@ -399,8 +403,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                       path: lineTrack,
                       geodesic: true,
                       strokeColor: '#2C82C9',
-                      strokeOpacity: 1.0,
-                      strokeWeight: 2
+                      strokeOpacity: 0.95,
+                      strokeWeight: 5
                     });
                     flightPath.setMap(map);
                     fStore.push(flightPath);
@@ -413,6 +417,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     $("#motion").attr("step",1);
                     $("#motion").attr("value",0);
                     showPlayer = true;
+                    showSpeed();
                     if(showPlayer == true)
                     {
                         $("#trackPlayer").removeClass("hidden");
@@ -457,10 +462,11 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                 t = this.value;
                 console.log("Set T to : "+t);
             });
+            var loopIt;
             function loopTracker(m,totalTrack,images)
             {
                  console.log("Total Track : "+lineTrack.length+ " TotalTrack = "+totalTrack);
-                 var loopIt = setInterval(function() {
+                 loopIt = setInterval(function() {
                       if(playTrack == true) {
                           if(lineTrack.length-1 != t)
                           {
@@ -562,29 +568,69 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         async: false
                     });
             }
+            var teuid,lat,long,id_car,start,end;
             $("#submitDate").click(function() {
               
                 console.log("Submit Form  Started..");
-                var start = $("#start").val();
-                var end = $("#end").val();
-                var teuid = $("#teuid").val();
-                var id_car = $("#id_car").val();
+                start = $("#start").val();
+                end = $("#end").val();
+                teuid = $("#teuid").val();
+                id_car = $("#id_car").val();
                 var latLong = $("#latLong").val();
-                var lat = latLong.split("*")[0];
-                var long = latLong.split("*")[1];
+                lat = latLong.split("*")[0];
+                long = latLong.split("*")[1];
                 start = Date.parse(start)/1000;
                 end = Date.parse(end)/1000;
                 dateLoaded = true;
                 console.log("Submit Form  END");
-                getTrack(teuid,start,end);
+                var tempStart = new Date(start*1000);
+                var tempEnd = new Date(start*1000);
+                tempStart.setHours(00,00,00,000);
+                tempStart = Date.parse(tempStart)/1000;
+                tempEnd.setHours(23,59,59,999);
+                tempEnd = Date.parse(tempEnd)/1000;
+                var opt="";
+                for (var d =new Date(start*1000); d.getDate() <= new Date(end*1000).getDate(); d.setDate(d.getDate() + 1)) {
+                    s = d;
+                    s.setHours(00,00,00,000);
+                    var value =new Date(s);
+                    s = Date.parse(s)/1000;
+                    e = d;
+                    e.setHours(23,59,59,999);
+                    e = Date.parse(e)/1000;
+                    console.log(s+"-"+e);
+                    opt += "<option value='"+s+"-"+e+"'>"+value.getDate().toString()+"-"+value.getMonth().toString()+"-"+value.getFullYear().toString()+"</option>";
+                }
+                    $("#switchDate").append(opt);
+                
+                getTrack(teuid,start,tempEnd);
                 for(c = 0; c < dataTrack.GPS_INFO.DATA.length; c++)
                 {
-                    lineTrack.push({lat : parseFloat(dataTrack.GPS_INFO.DATA[c].LAT),lng : parseFloat(dataTrack.GPS_INFO.DATA[c].LON)});
+                   lineTrack.push({lat : parseFloat(dataTrack.GPS_INFO.DATA[c].LAT),lng : parseFloat(dataTrack.GPS_INFO.DATA[c].LON)});
                 }
                 console.log("Call Track . . ");
-                loadTrack(id_car,teuid,lat,long);
+               loadTrack(id_car,teuid,lat,long);
+                
             });
-            
+            $("#switchDate").on("change", function(){
+                clearOverlays();
+                dateLoaded = true;
+                playTrack = true;
+                lineTrack = [];
+                dataTrack = [];
+                clearInterval(loopIt);
+                dateIt = this.value.split("-");
+                getTrack(teuid,dateIt[0],dateIt[1]);
+                var long,lat;
+                for(c = 0; c < dataTrack.GPS_INFO.DATA.length; c++)
+                {
+                    long = parseFloat(dataTrack.GPS_INFO.DATA[0].LON);
+                    lat = parseFloat(dataTrack.GPS_INFO.DATA[0].LAT);
+                   lineTrack.push({lat : parseFloat(dataTrack.GPS_INFO.DATA[c].LAT),lng : parseFloat(dataTrack.GPS_INFO.DATA[c].LON)});
+                }
+             loadTrack(id_car,teuid,lat,long);
+                
+            });
             function triggerDownload() {
                 clearOverlays();
                 // Change this depending on the name of your PHP file
