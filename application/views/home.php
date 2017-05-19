@@ -20,6 +20,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
         <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous">
         <script  type="text/javascript" src="<?= base_url("assets/noui/nouislider.min.js") ?>" ></script>
         <link href="<?= base_url("assets/noui/nouislider.min.css") ?>" rel="stylesheet" >
+        <script src="<?= base_url("assets/js/geofences.js") ?>" type="text/javascript"></script>
         
         <title>Tracker Mobil Rental</title>
         <style>
@@ -231,7 +232,7 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             RotateIcon.prototype.getUrl = function(){
                 return this.canvas.toDataURL('image/png');
             };
-            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = false,dataAkun,triggerOn=true,dataTrack,playTrack=true,showPlayer = false,stopTrack=false;
+            var map, infoWindow, intervalId,dataPOI=[],infoPOI,geocoder,showLabel = true,showCluster = false,dataAkun,triggerOn=true,dataTrack,playTrack=true,showPlayer = false,stopTrack=false,getIt;
             function getDtail()
             {
                  console.log("Get Detail Akun");
@@ -441,17 +442,8 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                  $("#speed").attr("min",(intSpeed/2) * -1);
                  $("#speed").attr("max",100*-1);
                  $("#speed").attr("value",(intSpeed/2) * -1);
-                if(speedOn == false)
-                {
-                    console.log("Show Interval");
-                    $("#divRange").removeClass("hidden");
-                    speedOn = true;
-                    
-                }else{
-                    console.log("Hide Interval");
-                    $("#divRange").addClass("hidden");
-                    speedOn = false;
-                }
+                 console.log("Show Interval");
+                 $("#divRange").removeClass("hidden");
                 
             }
             $("#speed").on("change", function(){
@@ -568,6 +560,17 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                         async: false
                     });
             }
+            function getStatus(uid)
+            {
+                 console.log("Get Status ID "+uid+" Loading ...");
+                  jQuery.ajax({
+                        url: '<?= base_url("ajax/getStatus/")?>'+uid,
+                        success: function (result) {
+                            getIt = jQuery.parseJSON(result);
+                        },
+                        async: false
+                    });
+            }
             var teuid,lat,long,id_car,start,end;
             $("#submitDate").click(function() {
               
@@ -655,11 +658,15 @@ defined('BASEPATH') OR exit('No direct script access allowed');
                     var color;
                     var direction = data.photos[i].direction;
                     var clr = "#EEEEEE";
+                    getStatus(data.photos[i].photo_id);
+                    var statusAlm = getIt.GPS_INFO.DATA.ALARMSTATE;
                     var images = "<?= base_url("assets/icon/icon_3_stop.gif") ?>";
                     if (data.photos[i].status > 0) {
                         if (data.photos[i].speed < 1) {
                             images = "<?= base_url("assets/icon/icon_3_lost.gif") ?>";
-                        } else {
+                        }else if(statusAlm > 0){
+                            images = "<?= base_url("assets/icon/icon_3_alarm.gif") ?>";
+                        }else{
                             images = "<?= base_url("assets/icon/icon_3_driver.gif") ?>";
                         }
                     }
